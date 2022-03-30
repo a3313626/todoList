@@ -32,4 +32,6 @@ func Database(connstring string) {
 	db.DB().SetConnMaxLifetime(time.Second * 30) //30秒超时
 	DB = db
 
+	migration()
+
 }
