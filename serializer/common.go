@@ -7,3 +7,9 @@ type Response struct {
 	Msg    string      `json:"msg"`
 	Error  string      `json:"error"`
 }
+
+//tokenData 带token的结构体数据
+type TokenData struct {
+	User  interface{} `json:"user"`
+	Token string      `json:"token"`
+}
