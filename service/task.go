@@ -38,6 +38,9 @@ type SearchTaskService struct {
 	PageSize int `json:"page_size" form:"page_size"`
 }
 
+type DeleteTaskService struct {
+}
+
 //新增一条备忘录
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
@@ -192,5 +195,41 @@ func (service *SearchTaskService) SearchTask(uid uint) serializer.Response {
 	}
 
 	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
+
+}
+
+//修改一条备忘录
+func (service *DeleteTaskService) DeleteTask(uid uint, taskId string) serializer.Response {
+	var task model.Task
+	err := model.DB.First(&task, taskId).Error
+
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "没有找到这条备忘录记录,无法修改",
+		}
+	}
+
+	if task.Uid != uid {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "没有找到这条备忘录记录",
+		}
+	}
+
+	err = model.DB.Delete(&task, taskId).Error
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "删除失败",
+		}
+	}
+
+	return serializer.Response{
+		Status: 200,
+		Msg:    "删除成功",
+
+		//Data:   task,
+	}
 
 }
