@@ -70,7 +70,7 @@ func SearchTask(c *gin.Context) {
 	claim, _ := utils.ParseToken(c.GetHeader("Authorization"))
 	//绑定服务对象
 	if err := c.ShouldBind(&service); err == nil {
-		res := service.SearchTask(claim.Id, c.PostForm("title"))
+		res := service.SearchTask(claim.Id)
 		c.JSON(200, res)
 	} else {
 		logrus.Error(err)

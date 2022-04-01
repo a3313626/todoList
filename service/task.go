@@ -4,8 +4,6 @@ import (
 	"time"
 	"todo_list/model"
 	"todo_list/serializer"
-
-	"github.com/sirupsen/logrus"
 )
 
 type CreateTaskService struct {
@@ -31,9 +29,10 @@ type UpdateTaskService struct {
 }
 
 type SearchTaskService struct {
-	Title   string `json:"title" form:"title" binding:"required"`
-	Content string `json:"content" form:"content"`
+	//Title   string `json:"title" form:"title" binding:"required"`
+	//	Content string `json:"content" form:"content"`
 	//Status  int    `json:"status" form:"status"` //0未做 1:已做
+	Search string `json:"search" form:"search" binding:"required"`
 
 	PageNum  int `json:"page_num" form:"page_num"`
 	PageSize int `json:"page_size" form:"page_size"`
@@ -166,9 +165,7 @@ func (service *UpdateTaskService) UpdateTask(uid uint, taskId string) serializer
 }
 
 //显示这个用户所有备忘录
-func (service *SearchTaskService) SearchTask(uid uint, title string) serializer.Response {
-	logrus.Info(title)
-	logrus.Info("查看提示")
+func (service *SearchTaskService) SearchTask(uid uint) serializer.Response {
 	var tasks []model.Task
 	count := 0
 
@@ -180,7 +177,12 @@ func (service *SearchTaskService) SearchTask(uid uint, title string) serializer.
 		service.PageNum = 1
 	}
 
-	model.DB.Model(&model.Task{}).Preload("User").Where("title like ?", "%"+title+"%").Count(&count).Limit(service.PageSize).Offset((service.PageNum - 1) * service.PageSize).Order("id desc").Find(&tasks)
+	model.DB.Model(&model.Task{}).Preload("User").
+		Where("title like ? OR content LIKE ?", "%"+service.Search+"%", "%"+service.Search+"%").
+		Where("uid = ?", uid).
+		Count(&count).Limit(service.PageSize).
+		Offset((service.PageNum - 1) * service.PageSize).
+		Order("id desc").Find(&tasks)
 
 	if count == 0 {
 		return serializer.Response{
