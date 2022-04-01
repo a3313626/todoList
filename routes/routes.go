@@ -2,6 +2,7 @@ package routes
 
 import (
 	"todo_list/api"
+	"todo_list/middleware"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -20,6 +21,14 @@ func NewRouter() *gin.Engine {
 		//用户操作
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
+
+		authed := v1.Group("/")
+		authed.Use(middleware.JWT())
+		{
+			authed.POST("task", api.CreateTask)
+			authed.GET("task/:id", api.ShowTask)
+		}
+
 	}
 
 	return r
