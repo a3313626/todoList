@@ -23,3 +23,11 @@ func BuildTask(task model.Task) Task {
 		EndTime:   task.EndTime,
 	}
 }
+
+func BuildTasks(items []model.Task) (tasks []Task) {
+	for _, item := range items {
+		task := BuildTask(item)
+		tasks = append(tasks, task)
+	}
+	return tasks
+}

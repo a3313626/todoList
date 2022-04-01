@@ -35,3 +35,17 @@ func ShowTask(c *gin.Context) {
 		c.JSON(500, err)
 	}
 }
+
+func ListTask(c *gin.Context) {
+	var service service.ListTaskService //声明user服务对象
+	//校验用户身份
+	claim, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	//绑定服务对象
+	if err := c.ShouldBind(&service); err == nil {
+		res := service.ListTask(claim.Id)
+		c.JSON(200, res)
+	} else {
+		logrus.Error(err)
+		c.JSON(500, err)
+	}
+}

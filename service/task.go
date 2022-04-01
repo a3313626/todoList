@@ -16,6 +16,11 @@ type CreateTaskService struct {
 type ShowTaskService struct {
 }
 
+type ListTaskService struct {
+	PageNum  int `json:"page_num" form:"page_num"`
+	PageSize int `json:"page_size" form:"page_size"`
+}
+
 //新增一条备忘录
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
@@ -70,5 +75,31 @@ func (service *ShowTaskService) Show(uid uint, taskId string) serializer.Respons
 		Data:   serializer.BuildTask(task),
 		//Data:   task,
 	}
+
+}
+
+//显示这个用户所有备忘录
+func (service *ListTaskService) ListTask(uid uint) serializer.Response {
+	var tasks []model.Task
+	count := 0
+
+	if service.PageSize <= 0 {
+		service.PageSize = 10
+	}
+
+	if service.PageNum <= 0 {
+		service.PageNum = 1
+	}
+
+	model.DB.Model(&model.Task{}).Preload("User").Where("uid=?", uid).First(&tasks, uid).Count(&count).Limit(service.PageSize).Offset((service.PageNum - 1) * service.PageSize).Order("id desc").Find(&tasks)
+
+	if count == 0 {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "您没有创建备忘录,请先创建",
+		}
+	}
+
+	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
 
 }
